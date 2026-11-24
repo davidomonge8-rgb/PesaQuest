@@ -53,8 +53,9 @@ function maskAmount(value, visible) {
   return visible ? value : '••••••'
 }
 
-function Dashboard() {
-  const [activeItem, setActiveItem] = useState('dashboard')
+function Dashboard({ activeItem: activeItemProp, onNavigate }) {
+  const [activeItemState, setActiveItemState] = useState(activeItemProp ?? 'dashboard')
+  const activeItem = activeItemProp ?? activeItemState
   const [balancesVisible, setBalancesVisible] = useState(true)
   const [allocationOpen, setAllocationOpen] = useState(false)
   const {
@@ -73,7 +74,13 @@ function Dashboard() {
 
   return (
     <div className="dashboard">
-      <Sidebar activeItem={activeItem} onNavigate={setActiveItem} />
+      <Sidebar
+        activeItem={activeItem}
+        onNavigate={(id) => {
+          if (activeItemProp == null) setActiveItemState(id)
+          onNavigate?.(id)
+        }}
+      />
 
       <div className="dashboard-main">
         <div className="dashboard-topbar">
