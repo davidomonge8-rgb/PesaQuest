@@ -1,0 +1,267 @@
+.budget-page {
+  display: flex;
+  min-height: 100svh;
+  background: var(--pq-bg);
+}
+
+.budget-main {
+  flex: 1;
+  min-width: 0;
+  padding: 22px 36px 40px;
+}
+
+.budget-topbar {
+  margin-bottom: 18px;
+}
+
+.budget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.budget-kicker {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pq-muted);
+}
+
+.budget-title {
+  margin: 0;
+  font-family: var(--pq-serif);
+  font-weight: 500;
+  font-size: 42px;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--pq-ink);
+}
+
+.budget-subtitle {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #7d756c;
+}
+
+.budget-update-btn {
+  border: 0;
+  background: #171412;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.budget-update-btn:hover {
+  background: #2a241f;
+}
+
+.budget-update-btn:focus-visible {
+  outline: 2px solid #171412;
+  outline-offset: 2px;
+}
+
+.budget-overview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.budget-overview-card {
+  background: var(--pq-card);
+  border-radius: 22px;
+  padding: 20px 22px;
+}
+
+.budget-overview-kicker {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pq-muted);
+}
+
+.budget-overview-value {
+  margin: 0;
+  font-family: var(--pq-serif);
+  font-size: 26px;
+  letter-spacing: -0.02em;
+  color: var(--pq-ink);
+}
+
+.budget-overview-note {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #8a8278;
+}
+
+.budget-progress-block {
+  margin-top: 18px;
+  background: var(--pq-card);
+  border-radius: 22px;
+  padding: 20px 22px;
+}
+
+.budget-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.budget-progress-head p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pq-ink);
+}
+
+.budget-progress-head span {
+  font-size: 13px;
+  color: #8a8278;
+}
+
+.budget-progress-track {
+  height: 10px;
+  border-radius: 999px;
+  background: #ece4d8;
+  overflow: hidden;
+}
+
+.budget-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #171412;
+  transition: width 0.3s ease;
+}
+
+.budget-buckets {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.budget-bucket {
+  background: var(--pq-card);
+  border-radius: 22px;
+  padding: 20px 22px;
+}
+
+.budget-bucket-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.budget-bucket-head h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--pq-ink);
+}
+
+.budget-bucket-share {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6f675f;
+  background: #f0e9df;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.budget-bucket-amount {
+  margin: 0;
+  font-family: var(--pq-serif);
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  color: var(--pq-ink);
+}
+
+.budget-bucket-note {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #8a8278;
+}
+
+.budget-target {
+  margin-top: 18px;
+  background: var(--pq-card);
+  border-radius: 22px;
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.budget-target h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--pq-ink);
+}
+
+.budget-target p {
+  margin: 0;
+  font-size: 13px;
+  color: #8a8278;
+}
+
+.budget-target select {
+  border: 1px solid #e2d9cc;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--pq-ink);
+}
+
+@media (max-width: 1100px) {
+  .budget-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .budget-buckets {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .budget-page {
+    flex-direction: column;
+  }
+
+  .budget-main {
+    padding: 20px 16px 32px;
+  }
+
+  .budget-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .budget-title {
+    font-size: 32px;
+  }
+
+  .budget-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .budget-target {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
