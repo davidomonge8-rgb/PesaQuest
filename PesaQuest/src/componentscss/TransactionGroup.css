@@ -1,0 +1,27 @@
+.txn-group + .txn-group {
+  margin-top: 22px;
+}
+
+.txn-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 6px 10px;
+}
+
+.txn-group-title,
+.txn-group-count {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9a9288;
+}
+
+.txn-group-card {
+  background: var(--pq-card);
+  border-radius: 22px;
+  padding: 4px 22px;
+}

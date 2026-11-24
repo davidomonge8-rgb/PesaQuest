@@ -2,6 +2,9 @@ import { useState } from 'react'
 import Sidebar from '../../components/Sidebar'
 import TopBar from '../../components/TopBar'
 import ActivityList from '../../components/ActivityList'
+import AllocationModal from '../../components/AllocationModal'
+import { useFinance } from '../../context/FinanceContext'
+import { formatKes } from '../../lib/finance'
 import './dashboard.css'
 
 const USER = {
@@ -50,14 +53,34 @@ function maskAmount(value, visible) {
   return visible ? value : '••••••'
 }
 
-function Dashboard() {
-  const [activeItem, setActiveItem] = useState('dashboard')
+function Dashboard({ activeItem: activeItemProp, onNavigate }) {
+  const [activeItemState, setActiveItemState] = useState(activeItemProp ?? 'dashboard')
+  const activeItem = activeItemProp ?? activeItemState
   const [balancesVisible, setBalancesVisible] = useState(true)
-  const [targetRate, setTargetRate] = useState('25')
+  const [allocationOpen, setAllocationOpen] = useState(false)
+  const {
+    allocation,
+    setAllocation,
+    targetRate,
+    setTargetRate,
+    monthlyBudget,
+    remaining,
+    dailySafe,
+    emergencyBuffer,
+    savingsTarget,
+    budgetProgress,
+    daysLeft,
+  } = useFinance()
 
   return (
     <div className="dashboard">
-      <Sidebar activeItem={activeItem} onNavigate={setActiveItem} />
+      <Sidebar
+        activeItem={activeItem}
+        onNavigate={(id) => {
+          if (activeItemProp == null) setActiveItemState(id)
+          onNavigate?.(id)
+        }}
+      />
 
       <div className="dashboard-main">
         <div className="dashboard-topbar">
@@ -105,9 +128,13 @@ function Dashboard() {
           <div className="income-amount-row">
             <div className="income-amount">
               <span className="income-currency">KES</span>
-              <span className="income-value">{maskAmount('140,000.00', balancesVisible)}</span>
+              <span className="income-value">{maskAmount(formatKes(allocation, 2), balancesVisible)}</span>
             </div>
-            <button type="button" className="income-update-btn">
+            <button
+              type="button"
+              className="income-update-btn"
+              onClick={() => setAllocationOpen(true)}
+            >
               Update Allocation
             </button>
           </div>
@@ -117,14 +144,16 @@ function Dashboard() {
           <div className="metric-card metric-budget">
             <p className="metric-kicker">Monthly budget</p>
             <p className="metric-value">
-              {maskAmount('KES 94,500', balancesVisible)} <span>/ 140,000</span>
+              {maskAmount(`KES ${formatKes(Math.round(monthlyBudget))}`, balancesVisible)}{' '}
+              <span>/ {formatKes(Math.round(allocation))}</span>
             </p>
             <div className="metric-progress">
               <div className="metric-progress-track" aria-hidden="true">
-                <div className="metric-progress-fill" style={{ width: '67.5%' }} />
+                <div className="metric-progress-fill" style={{ width: `${budgetProgress}%` }} />
               </div>
               <p className="metric-footnote">
-                {maskAmount('KES 45,500.00', balancesVisible)} remaining <strong>9 days left</strong>
+                {maskAmount(`KES ${formatKes(remaining, 2)}`, balancesVisible)} remaining{' '}
+                <strong>{daysLeft} days left</strong>
               </p>
             </div>
           </div>
@@ -132,7 +161,7 @@ function Dashboard() {
           <div className="metric-card metric-safe">
             <p className="metric-kicker">Safe-to-spend daily</p>
             <p className="metric-value">
-              {maskAmount('KES 4,136', balancesVisible)} <span>/ day</span>
+              {maskAmount(`KES ${formatKes(Math.round(dailySafe))}`, balancesVisible)} <span>/ day</span>
             </p>
             <div className="metric-safe-note">
               <p>
@@ -146,7 +175,7 @@ function Dashboard() {
                 </svg>
                 Rebalanced daily
               </p>
-              <p>Emergency buffer {maskAmount('KES 8,276.00', balancesVisible)}</p>
+              <p>Emergency buffer {maskAmount(`KES ${formatKes(emergencyBuffer, 2)}`, balancesVisible)}</p>
             </div>
           </div>
 
@@ -166,7 +195,7 @@ function Dashboard() {
             </div>
             <div className="metric-target-footer">
               <p>
-                ≈ {maskAmount(`KES ${((140000 * Number(targetRate)) / 100).toLocaleString('en-KE')}`, balancesVisible)} / mo
+                ≈ {maskAmount(`KES ${formatKes(Math.round(savingsTarget))}`, balancesVisible)} / mo
               </p>
               <button type="button" className="metric-set-btn">
                 Set Target
@@ -184,6 +213,19 @@ function Dashboard() {
           />
         </div>
       </div>
+
+      {allocationOpen ? (
+        <AllocationModal
+          open={allocationOpen}
+          allocation={allocation}
+          targetRate={targetRate}
+          onClose={() => setAllocationOpen(false)}
+          onSave={(value) => {
+            setAllocation(value)
+            setAllocationOpen(false)
+          }}
+        />
+      ) : null}
     </div>
   )
 }

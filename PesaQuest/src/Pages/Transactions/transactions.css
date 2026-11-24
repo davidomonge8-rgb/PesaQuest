@@ -1,0 +1,143 @@
+.transactions-page {
+  display: flex;
+  min-height: 100svh;
+  background: var(--pq-bg);
+}
+
+.transactions-main {
+  flex: 1;
+  min-width: 0;
+  padding: 22px 36px 40px;
+}
+
+.transactions-topbar {
+  margin-bottom: 18px;
+}
+
+.transactions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.transactions-kicker {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pq-muted);
+}
+
+.transactions-title {
+  margin: 0;
+  font-family: var(--pq-serif);
+  font-weight: 500;
+  font-size: 42px;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--pq-ink);
+}
+
+.transactions-subtitle {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #7d756c;
+}
+
+.transactions-log {
+  border: 0;
+  background: #171412;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.transactions-log:hover {
+  background: #2a241f;
+}
+
+.transactions-log:focus-visible,
+.transactions-page-btn:focus-visible {
+  outline: 2px solid #171412;
+  outline-offset: 2px;
+}
+
+.transactions-groups {
+  margin-top: 18px;
+}
+
+.transactions-empty {
+  margin: 0;
+  background: var(--pq-card);
+  border-radius: 22px;
+  padding: 28px 24px;
+  color: #7a736b;
+  font-size: 14px;
+}
+
+.transactions-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.transactions-footer p {
+  margin: 0;
+  font-size: 13px;
+  color: #8a8278;
+}
+
+.transactions-pager {
+  display: flex;
+  gap: 8px;
+}
+
+.transactions-page-btn {
+  border: 0;
+  background: #f0e9df;
+  color: #6f675f;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 999px;
+}
+
+.transactions-page-btn:hover:not(:disabled) {
+  background: #e6ded2;
+}
+
+.transactions-page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .transactions-page {
+    flex-direction: column;
+  }
+
+  .transactions-main {
+    padding: 20px 16px 32px;
+  }
+
+  .transactions-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .transactions-title {
+    font-size: 32px;
+  }
+}
