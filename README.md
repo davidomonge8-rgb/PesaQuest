@@ -22,6 +22,4 @@ Run `npm run lint` and `npm run build` from the repository root. The static buil
 
 ## Existing records
 
-The setup script also upgrades the original tables that use `user_id`. Existing transactions keep their account and transaction date. Older dated and category budgets stay in the database, and PesaQuest initializes a separate monthly allocation for each account.
-
 The schema preserves existing `demo` rows and removes their public access. If those rows belong to you, an administrator can assign them to your authenticated user by changing their `owner_key` to your Supabase user UUID. Check for an existing budget for that UUID before moving the demo budget because each account can have only one budget. Any earlier transactions that existed only in an open browser page were never saved to Supabase.

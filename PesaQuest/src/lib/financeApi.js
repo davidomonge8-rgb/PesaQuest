@@ -16,7 +16,7 @@ function mapTransaction(row) {
     date: row.occurred_on,
     time: row.occurred_at.slice(0, 5),
     occurredAt: row.occurred_at,
-    createdAt: row.created_at ?? '',
+    createdAt: row.created_at,
     icon: iconForCategory(row.category),
   }
 }
