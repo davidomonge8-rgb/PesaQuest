@@ -1,5 +1,10 @@
 {
-  "dependencies": {
-    "@supabase/supabase-js": "^2.119.2"
+  "name": "pesaquest-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix PesaQuest run dev",
+    "build": "npm --prefix PesaQuest run build",
+    "lint": "npm --prefix PesaQuest run lint",
+    "preview": "npm --prefix PesaQuest run preview"
   }
 }

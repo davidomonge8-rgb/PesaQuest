@@ -1,6 +1,21 @@
-export const LEDGER_TODAY = '2026-10-25'
-export const LEDGER_MONTH_LABEL = 'October 2026'
 export const PAGE_SIZE = 8
+
+const timeZone = 'Africa/Nairobi'
+const dateFormat = new Intl.DateTimeFormat('en-CA', {
+  timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+})
+const timeFormat = new Intl.DateTimeFormat('en-GB', {
+  timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+})
+
+export function toIsoDate(date = new Date()) {
+  const parts = Object.fromEntries(dateFormat.formatToParts(date).map(({ type, value }) => [type, value]))
+  return `${parts.year}-${parts.month}-${parts.day}`
+}
+
+export function monthLabel(date = new Date()) {
+  return date.toLocaleString('en-US', { timeZone, month: 'long', year: 'numeric' })
+}
 
 export const SOURCE_FILTERS = ['All', 'M-Pesa', 'Equity Bank', 'Stima SACCO']
 
@@ -354,7 +369,7 @@ export function formatNetKes(amount) {
 }
 
 export function currentTimeLabel(date = new Date()) {
-  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+  return timeFormat.format(date)
 }
 
 function parseIsoDate(iso) {
@@ -374,7 +389,7 @@ function formatGroupDate(iso) {
   return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`
 }
 
-export function groupTitle(iso, todayIso = LEDGER_TODAY) {
+export function groupTitle(iso, todayIso = toIsoDate()) {
   const date = parseIsoDate(iso)
   const today = parseIsoDate(todayIso)
   const diffDays = Math.round((today.getTime() - date.getTime()) / 86400000)
@@ -388,7 +403,7 @@ export function groupTitle(iso, todayIso = LEDGER_TODAY) {
   return `${WEEKDAYS[date.getDay()]} — ${pretty}`
 }
 
-export function groupTransactions(items, todayIso = LEDGER_TODAY) {
+export function groupTransactions(items, todayIso = toIsoDate()) {
   const groups = []
 
   items.forEach((item) => {

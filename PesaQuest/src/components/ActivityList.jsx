@@ -38,7 +38,7 @@ function ActivityList({ items }) {
     <section className="activity-card">
       <div className="activity-header">
         <p className="activity-kicker">Recent key activity</p>
-        <p className="activity-meta">Last {items.length} items</p>
+        <p className="activity-meta">{items.length ? `Last ${items.length} entries` : 'No transactions yet'}</p>
       </div>
 
       <div className="activity-list">
