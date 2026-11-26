@@ -8,7 +8,7 @@ import {
 } from '../lib/finance'
 import '../componentscss/AllocationModal.css'
 
-function AllocationModal({ open, allocation, targetRate, onClose, onSave }) {
+function AllocationModal({ open, allocation, targetRate, onClose, onSave, saving, error }) {
   const titleId = useId()
   const inputRef = useRef(null)
   const [draft, setDraft] = useState(allocation)
@@ -16,11 +16,8 @@ function AllocationModal({ open, allocation, targetRate, onClose, onSave }) {
 
   useEffect(() => {
     if (!open) return undefined
-    setDraft(allocation)
-    setInputValue(formatKes(allocation, 2))
-
     const onKeyDown = (event) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape' && !saving) onClose()
     }
     document.addEventListener('keydown', onKeyDown)
     const previousOverflow = document.body.style.overflow
@@ -30,7 +27,7 @@ function AllocationModal({ open, allocation, targetRate, onClose, onSave }) {
       document.removeEventListener('keydown', onKeyDown)
       document.body.style.overflow = previousOverflow
     }
-  }, [open, allocation, onClose])
+  }, [open, onClose, saving])
 
   const preview = useMemo(() => deriveFinance(draft, targetRate), [draft, targetRate])
 
@@ -47,10 +44,12 @@ function AllocationModal({ open, allocation, targetRate, onClose, onSave }) {
     setInputValue(formatKes(value, 2))
   }
 
+  const close = () => { if (!saving) onClose() }
+
   return (
     <div
       className="allocation-overlay"
-      onClick={onClose}
+      onClick={close}
       role="presentation"
     >
       <div
@@ -70,7 +69,7 @@ function AllocationModal({ open, allocation, targetRate, onClose, onSave }) {
                 Allocation
               </h2>
             </div>
-            <button type="button" className="allocation-close" onClick={onClose} aria-label="Close">
+            <button type="button" className="allocation-close" onClick={close} aria-label="Close">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M2 2l10 10M12 2 2 12" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
               </svg>
@@ -82,6 +81,7 @@ function AllocationModal({ open, allocation, targetRate, onClose, onSave }) {
             <span className="allocation-currency">KES</span>
             <input
               ref={inputRef}
+              disabled={saving}
               className="allocation-input"
               value={inputValue}
               inputMode="decimal"
@@ -120,6 +120,7 @@ function AllocationModal({ open, allocation, targetRate, onClose, onSave }) {
             {ALLOCATION_PRESETS.map((preset) => (
               <button
                 key={preset}
+                disabled={saving}
                 type="button"
                 className={`allocation-preset${draft === preset ? ' is-active' : ''}`}
                 onClick={() => applyPreset(preset)}
@@ -192,13 +193,15 @@ function AllocationModal({ open, allocation, targetRate, onClose, onSave }) {
           </div>
         </div>
 
+        {error && <p className="connection-error" role="alert">{error}</p>}
         <div className="allocation-footer">
-          <button type="button" className="allocation-cancel" onClick={onClose}>
+          <button type="button" className="allocation-cancel" onClick={close}>
             Cancel
           </button>
           <button
             type="button"
             className="allocation-save"
+            disabled={saving}
             onClick={() => {
               const next = parseKes(inputValue)
               onSave(next)
@@ -207,7 +210,7 @@ function AllocationModal({ open, allocation, targetRate, onClose, onSave }) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M5 13.2 9.2 17.5 19 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Save Allocation
+            {saving ? 'Saving…' : 'Save Allocation'}
           </button>
         </div>
       </div>

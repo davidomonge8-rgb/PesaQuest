@@ -5,31 +5,25 @@ import SummaryCards from '../../components/SummaryCards'
 import TransactionToolbar from '../../components/TransactionToolbar'
 import TransactionGroup from '../../components/TransactionGroup'
 import LogTransactionModal from '../../components/LogTransactionModal'
+import { useFinance } from '../../context/useFinance'
 import {
-  LEDGER_MONTH_LABEL,
-  LEDGER_TODAY,
   PAGE_SIZE,
-  SEED_TRANSACTIONS,
   currentTimeLabel,
   groupTransactions,
-  iconForCategory,
+  monthLabel,
+  toIsoDate,
   summarize,
 } from '../../data/transactions'
 import './transactions.css'
 
-const USER = {
-  name: 'Wanjiku Karanja',
-  role: 'Private Wealth',
-}
-
-function Transactions({ activeItem = 'transactions', onNavigate }) {
+function Transactions({ activeItem = 'transactions', onNavigate, user, initialLogOpen }) {
   const logButtonRef = useRef(null)
   const [balancesVisible, setBalancesVisible] = useState(true)
-  const [transactions, setTransactions] = useState(SEED_TRANSACTIONS)
+  const { transactions, addTransaction, loading, saving } = useFinance()
   const [query, setQuery] = useState('')
   const [source, setSource] = useState('All')
   const [page, setPage] = useState(1)
-  const [modalOpen, setModalOpen] = useState(false)
+  const [modalOpen, setModalOpen] = useState(Boolean(initialLogOpen))
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase()
@@ -43,7 +37,11 @@ function Transactions({ activeItem = 'transactions', onNavigate }) {
     })
   }, [transactions, query, source])
 
-  const summary = useMemo(() => summarize(transactions), [transactions])
+  const currentMonth = toIsoDate().slice(0, 7)
+  const summary = useMemo(
+    () => summarize(transactions.filter((entry) => entry.date.startsWith(currentMonth))),
+    [currentMonth, transactions],
+  )
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
   const startIndex = (currentPage - 1) * PAGE_SIZE
@@ -57,22 +55,20 @@ function Transactions({ activeItem = 'transactions', onNavigate }) {
     window.requestAnimationFrame(() => logButtonRef.current?.focus())
   }, [])
 
-  const handleLog = ({ amount, type, category }) => {
-    const stamp = new Date()
+  const handleLog = async ({ id, stamp, amount, type, category }) => {
     const entry = {
-      id: `txn-${stamp.getTime()}`,
+      id,
       merchant: category,
       description: type === 'income' ? 'Manual income' : type === 'transfer' ? 'Account transfer' : 'Manual expense',
       amount,
       type,
       category,
       source: 'M-Pesa',
-      date: LEDGER_TODAY,
+      date: toIsoDate(stamp),
       time: currentTimeLabel(stamp),
-      icon: iconForCategory(category),
     }
 
-    setTransactions((current) => [entry, ...current])
+    await addTransaction(entry)
     setPage(1)
     setQuery('')
     setSource('All')
@@ -88,7 +84,7 @@ function Transactions({ activeItem = 'transactions', onNavigate }) {
           <TopBar
             balancesVisible={balancesVisible}
             onToggleBalances={() => setBalancesVisible((open) => !open)}
-            user={USER}
+            user={user}
           />
         </div>
 
@@ -97,13 +93,14 @@ function Transactions({ activeItem = 'transactions', onNavigate }) {
             <p className="transactions-kicker">Ledger activity • KES Account</p>
             <h2 className="transactions-title">Transactions</h2>
             <p className="transactions-subtitle">
-              {LEDGER_MONTH_LABEL} • {transactions.length} total entries recorded
+              {monthLabel()} • {transactions.length} total entries recorded
             </p>
           </div>
           <button
             ref={logButtonRef}
             type="button"
             className="transactions-log"
+            disabled={loading || saving}
             onClick={() => setModalOpen(true)}
           >
             <span aria-hidden="true">+</span>
@@ -129,7 +126,7 @@ function Transactions({ activeItem = 'transactions', onNavigate }) {
         <div className="transactions-groups">
           {groups.length === 0 ? (
             <p className="transactions-empty" role="status">
-              No transactions match your search.
+              {transactions.length === 0 ? 'No transactions yet.' : 'No transactions match your filters.'}
             </p>
           ) : (
             groups.map((group) => (

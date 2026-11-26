@@ -3,57 +3,16 @@ import Sidebar from '../../components/Sidebar'
 import TopBar from '../../components/TopBar'
 import ActivityList from '../../components/ActivityList'
 import AllocationModal from '../../components/AllocationModal'
-import { useFinance } from '../../context/FinanceContext'
+import { useFinance } from '../../context/useFinance'
 import { formatKes } from '../../lib/finance'
+import { formatSignedKes, monthLabel } from '../../data/transactions'
 import './dashboard.css'
-
-const USER = {
-  firstName: 'Wanjiku',
-  name: 'Wanjiku Karanja',
-  role: 'Private Wealth',
-}
-
-const ACTIVITY = [
-  {
-    id: 'retainer',
-    title: 'Client Retainer Deposit',
-    source: 'Equity Bank',
-    date: 'Yesterday',
-    amount: '+KES 120,000.00',
-    credit: true,
-    icon: 'inflow',
-  },
-  {
-    id: 'sacco',
-    title: 'Stima SACCO Deposit',
-    source: 'Standing Order',
-    date: '24 Oct',
-    amount: 'KES 15,000.00',
-    icon: 'standing',
-  },
-  {
-    id: 'naivas',
-    title: 'Naivas Supermarket',
-    source: 'M-Pesa Till 48201',
-    date: '23 Oct',
-    amount: 'KES 4,820.00',
-    icon: 'shop',
-  },
-  {
-    id: 'kplc',
-    title: 'KPLC Prepaid Tokens',
-    source: 'M-Pesa Paybill',
-    date: '22 Oct',
-    amount: 'KES 2,500.00',
-    icon: 'utility',
-  },
-]
 
 function maskAmount(value, visible) {
   return visible ? value : '••••••'
 }
 
-function Dashboard({ activeItem: activeItemProp, onNavigate }) {
+function Dashboard({ activeItem: activeItemProp, onNavigate, user }) {
   const [activeItemState, setActiveItemState] = useState(activeItemProp ?? 'dashboard')
   const activeItem = activeItemProp ?? activeItemState
   const [balancesVisible, setBalancesVisible] = useState(true)
@@ -63,6 +22,9 @@ function Dashboard({ activeItem: activeItemProp, onNavigate }) {
     setAllocation,
     targetRate,
     setTargetRate,
+    loading,
+    saving,
+    error,
     monthlyBudget,
     remaining,
     dailySafe,
@@ -70,6 +32,7 @@ function Dashboard({ activeItem: activeItemProp, onNavigate }) {
     savingsTarget,
     budgetProgress,
     daysLeft,
+    transactions,
   } = useFinance()
 
   return (
@@ -87,20 +50,18 @@ function Dashboard({ activeItem: activeItemProp, onNavigate }) {
           <TopBar
             balancesVisible={balancesVisible}
             onToggleBalances={() => setBalancesVisible((open) => !open)}
-            user={USER}
+            user={user}
           />
         </div>
 
         <div className="dashboard-greeting">
           <div className="dashboard-greeting-copy">
             <p className="dashboard-status">
-              October 2026
-              <span className="dashboard-status-dot" />
-              <span className="dashboard-status-sync">All accounts synchronized</span>
+              {monthLabel()}
             </p>
-            <h2 className="dashboard-hello">Good morning, {USER.firstName}</h2>
+            <h2 className="dashboard-hello">Dashboard</h2>
           </div>
-          <button type="button" className="dashboard-log-btn">
+          <button type="button" className="dashboard-log-btn" onClick={() => onNavigate?.('transactions', true)}>
             <span aria-hidden="true">+</span>
             Log Transaction
           </button>
@@ -110,11 +71,11 @@ function Dashboard({ activeItem: activeItemProp, onNavigate }) {
           <div className="income-header">
             <div className="income-intro">
               <p className="income-kicker">
-                Monthly inflow allocation <span>• October 2026</span>
+                Monthly inflow allocation <span>• {monthLabel()}</span>
               </p>
               <h3 className="income-title">Estimated Monthly Income &amp; Allowance</h3>
               <p className="income-copy">
-                Set your expected baseline income for October 2026 to calibrate daily
+                Set your expected baseline income for {monthLabel()} to calibrate daily
                 safe-to-spend targets, savings velocity, and budget pacing.
               </p>
             </div>
@@ -133,6 +94,7 @@ function Dashboard({ activeItem: activeItemProp, onNavigate }) {
             <button
               type="button"
               className="income-update-btn"
+              disabled={loading || saving}
               onClick={() => setAllocationOpen(true)}
             >
               Update Allocation
@@ -145,7 +107,7 @@ function Dashboard({ activeItem: activeItemProp, onNavigate }) {
             <p className="metric-kicker">Monthly budget</p>
             <p className="metric-value">
               {maskAmount(`KES ${formatKes(Math.round(monthlyBudget))}`, balancesVisible)}{' '}
-              <span>/ {formatKes(Math.round(allocation))}</span>
+              <span>/ {maskAmount(formatKes(Math.round(allocation)), balancesVisible)}</span>
             </p>
             <div className="metric-progress">
               <div className="metric-progress-track" aria-hidden="true">
@@ -187,7 +149,7 @@ function Dashboard({ activeItem: activeItemProp, onNavigate }) {
             <p className="metric-target-title">Save for Future Wealth</p>
             <div className="metric-rate-row">
               <span>Target rate</span>
-              <select value={targetRate} onChange={(event) => setTargetRate(event.target.value)}>
+              <select disabled={loading || saving} value={targetRate} onChange={(event) => setTargetRate(event.target.value)}>
                 <option value="20">20% of salary</option>
                 <option value="25">25% of salary</option>
                 <option value="30">30% of salary</option>
@@ -197,18 +159,20 @@ function Dashboard({ activeItem: activeItemProp, onNavigate }) {
               <p>
                 ≈ {maskAmount(`KES ${formatKes(Math.round(savingsTarget))}`, balancesVisible)} / mo
               </p>
-              <button type="button" className="metric-set-btn">
-                Set Target
-              </button>
             </div>
           </div>
         </div>
 
         <div className="dashboard-activity">
           <ActivityList
-            items={ACTIVITY.map((item) => ({
-              ...item,
-              amount: balancesVisible ? item.amount : '••••••',
+            items={transactions.slice(0, 4).map((item) => ({
+              id: item.id,
+              title: item.merchant,
+              source: item.source,
+              date: item.date,
+              amount: maskAmount(formatSignedKes(item.amount, item.type), balancesVisible),
+              credit: item.type === 'income',
+              icon: item.type === 'income' ? 'inflow' : item.type === 'transfer' ? 'standing' : 'shop',
             }))}
           />
         </div>
@@ -220,9 +184,10 @@ function Dashboard({ activeItem: activeItemProp, onNavigate }) {
           allocation={allocation}
           targetRate={targetRate}
           onClose={() => setAllocationOpen(false)}
-          onSave={(value) => {
-            setAllocation(value)
-            setAllocationOpen(false)
+          saving={saving || loading}
+          error={error}
+          onSave={async (value) => {
+            if (await setAllocation(value)) setAllocationOpen(false)
           }}
         />
       ) : null}

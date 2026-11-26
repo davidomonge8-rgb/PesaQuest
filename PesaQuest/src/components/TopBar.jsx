@@ -33,22 +33,9 @@ function TopBar({ balancesVisible, onToggleBalances, user }) {
       </button>
 
       <div className="topbar-user">
-        <button type="button" className="topbar-notify" aria-label="Notifications">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M6 9a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 13 6 9Z"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinejoin="round"
-            />
-            <path d="M10 18.5a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-          </svg>
-        </button>
-
         <div className="topbar-profile">
           <div>
             <span className="topbar-name">{user.name}</span>
-            <span className="topbar-role">{user.role}</span>
           </div>
           <span className="topbar-avatar" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">

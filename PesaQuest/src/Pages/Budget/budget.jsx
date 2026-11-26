@@ -2,21 +2,16 @@ import { useState } from 'react'
 import Sidebar from '../../components/Sidebar'
 import TopBar from '../../components/TopBar'
 import AllocationModal from '../../components/AllocationModal'
-import { useFinance } from '../../context/FinanceContext'
+import { useFinance } from '../../context/useFinance'
 import { formatKes } from '../../lib/finance'
+import { monthLabel } from '../../data/transactions'
 import './budget.css'
-
-const USER = {
-  firstName: 'Wanjiku',
-  name: 'Wanjiku Karanja',
-  role: 'Private Wealth',
-}
 
 function maskAmount(value, visible) {
   return visible ? value : '••••••'
 }
 
-function Budget({ activeItem = 'budgets', onNavigate }) {
+function Budget({ activeItem = 'budgets', onNavigate, user }) {
   const [balancesVisible, setBalancesVisible] = useState(true)
   const [allocationOpen, setAllocationOpen] = useState(false)
   const {
@@ -24,6 +19,9 @@ function Budget({ activeItem = 'budgets', onNavigate }) {
     setAllocation,
     targetRate,
     setTargetRate,
+    loading,
+    saving,
+    error,
     needs,
     lifestyle,
     sacco,
@@ -68,21 +66,22 @@ function Budget({ activeItem = 'budgets', onNavigate }) {
           <TopBar
             balancesVisible={balancesVisible}
             onToggleBalances={() => setBalancesVisible((open) => !open)}
-            user={USER}
+            user={user}
           />
         </div>
 
         <header className="budget-header">
           <div>
-            <p className="budget-kicker">Spending plan • October 2026</p>
+            <p className="budget-kicker">Spending plan • {monthLabel()}</p>
             <h2 className="budget-title">Budgets</h2>
             <p className="budget-subtitle">
-              50 / 30 / 20 split on a KES {formatKes(allocation)} monthly allocation
+              50 / 30 / 20 split on a {maskAmount(`KES ${formatKes(allocation)}`, balancesVisible)} monthly allocation
             </p>
           </div>
           <button
             type="button"
             className="budget-update-btn"
+            disabled={loading || saving}
             onClick={() => setAllocationOpen(true)}
           >
             <span aria-hidden="true">+</span>
@@ -112,7 +111,7 @@ function Budget({ activeItem = 'budgets', onNavigate }) {
             <p className="budget-overview-value">
               {maskAmount(`KES ${formatKes(remaining, 2)}`, balancesVisible)}
             </p>
-            <p className="budget-overview-note">{daysLeft} days left in October</p>
+            <p className="budget-overview-note">{daysLeft} days left this month</p>
           </div>
           <div className="budget-overview-card">
             <p className="budget-overview-kicker">Savings target</p>
@@ -153,7 +152,7 @@ function Budget({ activeItem = 'budgets', onNavigate }) {
             <h3>Salary target</h3>
             <p>Choose how much of your income goes to future wealth.</p>
           </div>
-          <select value={targetRate} onChange={(event) => setTargetRate(event.target.value)}>
+          <select disabled={loading || saving} value={targetRate} onChange={(event) => setTargetRate(event.target.value)}>
             <option value="20">20% of salary</option>
             <option value="25">25% of salary</option>
             <option value="30">30% of salary</option>
@@ -167,9 +166,10 @@ function Budget({ activeItem = 'budgets', onNavigate }) {
           allocation={allocation}
           targetRate={targetRate}
           onClose={() => setAllocationOpen(false)}
-          onSave={(value) => {
-            setAllocation(value)
-            setAllocationOpen(false)
+          saving={saving || loading}
+          error={error}
+          onSave={async (value) => {
+            if (await setAllocation(value)) setAllocationOpen(false)
           }}
         />
       ) : null}

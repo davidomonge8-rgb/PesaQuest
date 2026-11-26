@@ -1,0 +1,66 @@
+.account-screen {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.account-card {
+  width: min(100%, 420px);
+  padding: 32px;
+  border: 1px solid var(--pq-line);
+  border-radius: 20px;
+  background: var(--pq-card);
+}
+
+.account-card h1 {
+  margin: 0;
+  font: 600 2.25rem var(--pq-serif);
+}
+
+.account-card h2 {
+  font-size: 1.1rem;
+}
+
+.account-card form,
+.account-card label {
+  display: grid;
+  gap: 10px;
+}
+
+.account-card form {
+  gap: 18px;
+}
+
+.account-card input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #b4aa9d;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.account-card button,
+.connection-bar button {
+  padding: 8px 12px;
+  border: 1px solid #b4aa9d;
+  border-radius: 8px;
+  background: var(--pq-card);
+  color: var(--pq-ink);
+}
+
+.account-card button[type="submit"] {
+  background: var(--pq-ink);
+  color: white;
+  padding: 11px;
+}
+
+.account-card .account-switch {
+  margin-top: 16px;
+}
+
+.account-card [role="alert"],
+.connection-error {
+  color: #921c24;
+  overflow-wrap: anywhere;
+}

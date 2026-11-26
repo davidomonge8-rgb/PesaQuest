@@ -23,16 +23,19 @@ function LogTransactionModal({ open, onClose, onSubmit }) {
   const amountId = useId()
   const errorId = useId()
   const amountRef = useRef(null)
+  const pendingEntry = useRef(null)
+  const submitting = useRef(false)
   const [type, setType] = useState('expense')
   const [amountInput, setAmountInput] = useState('0.00')
   const [category, setCategory] = useState('')
   const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!open) return undefined
 
     const onKeyDown = (event) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape' && !submitting.current) onClose()
     }
 
     document.addEventListener('keydown', onKeyDown)
@@ -54,8 +57,11 @@ function LogTransactionModal({ open, onClose, onSubmit }) {
     setAmountInput((current) => formatKesAmount(parseAmount(current) + delta))
   }
 
-  const submit = (event) => {
+  const close = () => { if (!submitting.current) onClose() }
+
+  const submit = async (event) => {
     event.preventDefault()
+    if (submitting.current) return
     const amount = parseAmount(amountInput)
 
     if (amount <= 0) {
@@ -69,11 +75,25 @@ function LogTransactionModal({ open, onClose, onSubmit }) {
       return
     }
 
-    onSubmit({ amount, type, category })
+    const last = pendingEntry.current
+    if (!last || last.amount !== amount || last.type !== type || last.category !== category) {
+      pendingEntry.current = { id: crypto.randomUUID(), stamp: new Date(), amount, type, category }
+    }
+    submitting.current = true
+    setSaving(true)
+    setError('')
+    try {
+      await onSubmit(pendingEntry.current)
+    } catch (err) {
+      setError(err.message || 'Could not save the transaction. Try again.')
+    } finally {
+      submitting.current = false
+      setSaving(false)
+    }
   }
 
   return (
-    <div className="log-overlay" onClick={onClose} role="presentation">
+    <div className="log-overlay" onClick={close} role="presentation">
       <div
         className="log-modal"
         role="dialog"
@@ -94,7 +114,7 @@ function LogTransactionModal({ open, onClose, onSubmit }) {
                 </h2>
                 <p className="log-subtitle">Record an expense, income, or account transfer</p>
               </div>
-              <button type="button" className="log-close" onClick={onClose} aria-label="Close">
+              <button type="button" className="log-close" disabled={saving} onClick={close} aria-label="Close">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                   <path d="M2 2l10 10M12 2 2 12" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
                 </svg>
@@ -106,6 +126,7 @@ function LogTransactionModal({ open, onClose, onSubmit }) {
                 const active = type === tab.id
                 return (
                   <button
+                    disabled={saving}
                     key={tab.id}
                     type="button"
                     role="tab"
@@ -128,6 +149,7 @@ function LogTransactionModal({ open, onClose, onSubmit }) {
                 KES
               </span>
               <input
+                disabled={saving}
                 ref={amountRef}
                 id={amountId}
                 className="log-amount-input"
@@ -155,6 +177,7 @@ function LogTransactionModal({ open, onClose, onSubmit }) {
               <span className="log-quick-label">Quick Add:</span>
               {QUICK_ADDS.map((chip) => (
                 <button
+                  disabled={saving}
                   key={chip.value}
                   type="button"
                   className="log-chip"
@@ -165,6 +188,7 @@ function LogTransactionModal({ open, onClose, onSubmit }) {
               ))}
               <button
                 type="button"
+                disabled={saving}
                 className="log-chip log-chip-clear"
                 onClick={() => {
                   setError('')
@@ -183,6 +207,7 @@ function LogTransactionModal({ open, onClose, onSubmit }) {
                 const active = category === item
                 return (
                   <button
+                    disabled={saving}
                     key={item}
                     type="button"
                     className={`log-chip${active ? ' is-active' : ''}`}
@@ -206,14 +231,14 @@ function LogTransactionModal({ open, onClose, onSubmit }) {
           </div>
 
           <div className="log-footer">
-            <button type="button" className="log-cancel" onClick={onClose}>
+            <button type="button" className="log-cancel" disabled={saving} onClick={close}>
               Cancel
             </button>
-            <button type="submit" className="log-submit">
+            <button type="submit" className="log-submit" disabled={saving}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M5 13.2 9.2 17.5 19 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              Log Transaction
+              {saving ? 'Saving…' : 'Log Transaction'}
             </button>
           </div>
         </form>

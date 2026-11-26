@@ -1,3 +1,26 @@
 .app-shell {
   min-height: 100svh;
 }
+
+.connection-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 8px 16px;
+  background: var(--pq-sidebar);
+  border-bottom: 1px solid var(--pq-line);
+  font-size: 0.875rem;
+}
+
+.connection-bar span:first-child {
+  margin-right: auto;
+  overflow-wrap: anywhere;
+}
+
+.connection-error {
+  margin: 0;
+  padding: 12px 16px;
+  background: #fff4f3;
+}
